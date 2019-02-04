@@ -62,13 +62,15 @@ namespace imu_stim300
 	    int sampling_frequency; /** Sampling Frequency**/
 	    int counter_ratio; /** Packet counter ratio **/
         base::Time pckgTimeout; /** Estimate time to have a whole package **/
-	    uint8_t prev_counter; /** Counter is incremented by 9 units; Here the previous to the current packge is saved **/
+	    uint8_t prev_counter; /** Counter increases per internal measurment (2000 times per second); here the count of previous package is stored**/
+        uint8_t datagram_counter_diff; /** Number of internal measurments of the IMU since last package **/
 	    sensor_values inertial_values; /** Struct with the processes STIM300 values **/
 	    STIM300_MODES modes; /** The three states of the automata of the STIM300 **/
 	    bool internal_error; /** If Acc, Gyros or Incl report error it would be true (false by default)**/
             imu_stim300::DATAGRAM_CONTENT content; /** Content of the datagram (package) configuration NOTE: So far only RATE_ACC_INCLI_TEMP is implemented **/
 	    ACC_OUTPUT acc_output; /** Type of values returned by the STIM300. By defaults it is Acceleration in m/s^2 **/
             boost::uint32_t expectedCRC, calculatedCRC; /* Expected and calculated checksum value **/
+
 
 	public:
 
@@ -163,8 +165,12 @@ namespace imu_stim300
 	    Eigen::Vector3d getInclData ();
 
 		/** \brief Return the Auxilirary sensor values
-+        */
+        */
 		double getAuxData ();
+
+        /** \brief Return the number of sent datagrams since last reset
+        */
+		unsigned int getDatagramCounterDiff();
 
 
 		/** \brief Return the Temperature values from Gyros

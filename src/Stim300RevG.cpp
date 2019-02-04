@@ -10,9 +10,10 @@ Stim300RevG::Stim300RevG()
 
     this->content = RATE_ACC_INCLI_TEMP_AUX_REVG;
 
-    this->prev_counter = std::numeric_limits<double>::quiet_NaN();
+    this->prev_counter = std::numeric_limits<uint8_t >::quiet_NaN();
 
     this->counter_ratio = imu_stim300::DEFAULT_SAMPLING_FREQUENCY/this->sampling_frequency;
+    this->datagram_counter_diff = 0;
 
     this->inertial_values.counter = 0;
     this->inertial_values.acc[0] = std::numeric_limits<double>::quiet_NaN();
@@ -133,6 +134,7 @@ int Stim300RevG::processPacket()
 
         //std::cout<<"sizeof(struct packet): "<<sizeof(struct packet)<<"\n";
         //std::cout<<"sizeof(buffer): "<<sizeof(buffer)<<"\n";
+        //std::cout<<"buf_size: "<<buf_size<<"\n";
 
         /** Verify the Checksum **/
         this->inertial_values.checksum = verifyChecksum(this->expectedCRC, this->calculatedCRC);
@@ -142,27 +144,33 @@ int Stim300RevG::processPacket()
             this->internal_error = false;
 
             /** If everything is alright convert the values **/
-            if (prev_counter == std::numeric_limits<double>::quiet_NaN())
+            if (prev_counter == std::numeric_limits<uint8_t >::quiet_NaN())
+            {
+                //printf("First_Current  Counter: %d (%X)\n", this->currentP->counter, this->currentP->counter);
+                //printf("First_Prewious Counter: %d (%X)\n", prev_counter, prev_counter);
                 prev_counter = this->currentP->counter;
+            }
             else
             {
-                std::cout<<"Current  Counter = "<<this->currentP->counter << "\n";
-                std::cout<<"Prewious Counter = "<<prev_counter << "\n";
-                std::cout<<"Diff in Counters = "<<(this->currentP->counter - prev_counter)<< "\n";
+                //printf ("Current  Counter: %d (%X)\n", this->currentP->counter, this->currentP->counter);
+                //printf ("Prewious Counter: %d (%X)\n", prev_counter, prev_counter);
+                //std::cout<<"Diff in Counters = "<<(this->currentP->counter - prev_counter)<< "\n";
                 if ((this->currentP->counter - prev_counter) >= 0)
                 {
-                    this->inertial_values.counter += this->currentP->counter - prev_counter;
-                    std::cout << "Wraparound fixed = " << (this->currentP->counter - prev_counter) << "\n";
+                    this->datagram_counter_diff = (this->currentP->counter - prev_counter);//this->counter_ratio;
+                    //std::cout << "Wraparound fixed = " << (this->currentP->counter - prev_counter) << "\n";
                 }
                 else // counter has run over 255 and re-wrapped to zero
                 {
-                    this->inertial_values.counter += this->currentP->counter - prev_counter + 255;
-                    std::cout << "Wraparound fixed = " << this->currentP->counter - prev_counter + 255 << "\n";
+                    this->datagram_counter_diff = (this->currentP->counter - prev_counter + 256);//this->counter_ratio;
+                    //std::cout << "Wraparound fixed = " << this->currentP->counter - prev_counter + 256 << "\n";
                 }
 
                 //this->inertial_values.counter += (this->currentP->counter - prev_counter)%this->counter_ratio;
-                //prev_counter = this->currentP->counter;
+                prev_counter = this->currentP->counter;
             }
+
+            this->inertial_values.counter = this->currentP->counter;
 
 
             /** Convert gyros raw to calibrated values **/
@@ -236,7 +244,7 @@ void Stim300RevG::printInfo()
     std::cout<<"Baudrate: "<<this->baudrate <<"\n";
     std::cout<<"Datagram content: "<<this->content <<"\n";
     std::cout<<"Current mode (Automata): "<<this->modes <<"\n";
-    printf ("Datagram counter: %X Package counter: %d (%X)\n", this->currentP->counter, this->inertial_values.counter, this->inertial_values.counter);
+    printf ("Datagram counter: %d Package counter: %d\n", this->datagram_counter_diff, this->inertial_values.counter);
     printf ("Gyros Status: %X\n", this->currentP->gyros_status);
     std::cout<<"Gyros[rad/s]: "<<this->inertial_values.gyro[0]<<" "<<this->inertial_values.gyro[1]<<" "<<this->inertial_values.gyro[2]<<"\n";
     printf ("Acc Status: %X\n", this->currentP->acc_status);

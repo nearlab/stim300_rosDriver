@@ -63,6 +63,7 @@ bool Stim300Base::fullReset()
 	std::cout<<"SEND x n COMMAND IN SERVICE MODE (RETURN TO NORMAL MODE)\n";
 	Driver::writePacket(ptr_cmd, sizeof(reset), 0);
 	this->modes = NORMAL;
+	this->datagram_counter_diff = 0;
 	
 	return true;
     }
@@ -206,6 +207,11 @@ Eigen::Vector3d Stim300Base::getInclData()
 double Stim300Base::getAuxData()
 {
     return this->inertial_values.aux;
+}
+
+unsigned int Stim300Base::getDatagramCounterDiff()
+{
+	return this->datagram_counter_diff;
 }
 
 std::vector<double> Stim300Base::getTempData()

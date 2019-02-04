@@ -273,6 +273,8 @@ int main(int argc, char** argv)
     myDriverRevG.welcome();
 
     myDriverRevG.setBaudrate(iodrivers_base::Driver::SERIAL_921600);
+    myDriverRevG.setFrequency(125);
+    myDriverRevG.setPackageTimeout(0.1);
 
 
     if (!myDriverRevG.open(argv[1]))
@@ -281,16 +283,30 @@ int main(int argc, char** argv)
 	perror("errno is");
 	return 1;
     }
+    usleep(98000);
+    //myDriverRevG.printInfo();
 
-    myDriverRevG.printInfo();
+    int i = 1;
+    int diff = 0;
+    while (i < 100)
+    {
+        i++;
+        //usleep(9800);
 
-    //int i = 0;
 
-//    while (true)
-//    {
-        usleep(9800);
-	myDriverRevG.processPacket();
-	myDriverRevG.printInfo();
+        myDriverRevG.processPacket();
+        //myDriverRevG.printInfo();
+
+
+
+        //std::cout<<"Datagram counter diff: "<< myDriverRevG.getDatagramCounterDiff()<<"\n";
+        //std::cout<<"Gyro: " <<myDriverRevG.getGyroData()[0] <<"\n";
+        diff = myDriverRevG.getDatagramCounterDiff();
+        if (diff != 16)
+        {
+			std::cout << "Current Datagram counter diff : " << diff << "\n\n";
+		}
+    }
 
 	
 // 	usleep (2000);
