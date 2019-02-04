@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <imu_stim300/Stim300RevD.hpp>
-#include <imu_stim300/Stim300RevB.hpp>
+#include <Stim300RevD.hpp>
+#include <Stim300RevB.hpp>
 
 
 using namespace std;
