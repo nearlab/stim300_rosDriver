@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <Stim300RevD.hpp>
 #include <Stim300RevB.hpp>
+#include <Stim300RevG.hpp>
 
 
 using namespace std;
@@ -180,6 +181,7 @@ int main(int argc, char** argv)
 {
     imu_stim300::Stim300RevD myDriverRevD;
     imu_stim300::Stim300RevB myDriverRevB;
+	imu_stim300::Stim300RevG myDriverRevG;
     handling_t pfunc;
 	
     if (argc<2)
@@ -192,7 +194,7 @@ int main(int argc, char** argv)
     pfunc = signal_terminator;
 
     /* Catching system signals */
-    signal_catcher (SIGHUP,SIGINT,SIGTERM, SIGSEGV, pfunc, &myDriverRevD);
+    signal_catcher (SIGHUP,SIGINT,SIGTERM, SIGSEGV, pfunc, &myDriverRevG);
 
 //     ******************************************
     // This is "123456789" in ASCII
@@ -268,27 +270,27 @@ int main(int argc, char** argv)
 //     return 0;
 
 
-    myDriverRevD.welcome();
+    myDriverRevG.welcome();
 
-    myDriverRevD.setBaudrate(iodrivers_base::Driver::SERIAL_921600);
+    myDriverRevG.setBaudrate(iodrivers_base::Driver::SERIAL_921600);
 
 
-    if (!myDriverRevD.open(argv[1]))
+    if (!myDriverRevG.open(argv[1]))
     {
 	cerr << "cannot open device: " << argv[1] << endl;
 	perror("errno is");
 	return 1;
     }
 
-    myDriverRevD.printInfo();
+    myDriverRevG.printInfo();
 
     //int i = 0;
 
 //    while (true)
 //    {
         usleep(9800);
-	myDriverRevD.processPacket();
-	myDriverRevD.printInfo();
+	myDriverRevG.processPacket();
+	myDriverRevG.printInfo();
 
 	
 // 	usleep (2000);
@@ -322,7 +324,7 @@ int main(int argc, char** argv)
 	
 //    }
 
-    myDriverRevD.close();
+    myDriverRevG.close();
 	
     return 0;
 }

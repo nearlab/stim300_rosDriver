@@ -21,7 +21,8 @@ namespace imu_stim300
         RATE_ACC = 0x91,
         RATE_INCLI = 0x92,
         RATE_ACC_INCLI_TEMP_REVB = 0x97,
-        RATE_ACC_INCLI_TEMP_REVD = 0xA7
+        RATE_ACC_INCLI_TEMP_REVD = 0xA7,
+		RATE_ACC_INCLI_TEMP_AUX_REVG = 0xAF
     };
 
     /** Accelerometers Type output **/
@@ -51,6 +52,7 @@ namespace imu_stim300
                 double gyro[3];
                 double acc[3];
                 double incl[3];
+                double aux;
                 std::vector<double> temp;
                 double latency;
                 bool checksum;
@@ -160,7 +162,12 @@ namespace imu_stim300
 	     */
 	    Eigen::Vector3d getInclData ();
 
-	    /** \brief Return the Temperature values from Gyros
+		/** \brief Return the Auxilirary sensor values
++        */
+		double getAuxData ();
+
+
+		/** \brief Return the Temperature values from Gyros
 	     */
 	    std::vector<double> getTempData ();
 

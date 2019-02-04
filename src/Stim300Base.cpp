@@ -203,6 +203,11 @@ Eigen::Vector3d Stim300Base::getInclData()
     return Eigen::Vector3d (this->inertial_values.incl[0], this->inertial_values.incl[1], this->inertial_values.incl[2]);
 }
 
+double Stim300Base::getAuxData()
+{
+    return this->inertial_values.aux;
+}
+
 std::vector<double> Stim300Base::getTempData()
 {
     return this->inertial_values.temp;
