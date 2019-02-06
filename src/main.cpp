@@ -233,14 +233,18 @@ int main(int argc , char **argv)
 
     ros::NodeHandle node;
 
+
     ros::Publisher imuSensorPublisher = node.advertise<sensor_msgs::Imu>("sensors/imus/STIM300", 1000);
 
     ros::Rate loop_rate(125);
 
     //int i{0};
 
-    //nt differenceInDataGram{0};
+    int differenceInDataGram{0};
     int countMessages{0};
+
+
+
 
     while(ros::ok()){
         
@@ -249,15 +253,26 @@ int main(int argc , char **argv)
 
         myDriverRevG.processPacket();
 
-        //differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
+        differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
 
-        //if (differenceInDataGram != 16)
-        //{
-		//	std::cout << "Current Datagram counter diff : " << differenceInDataGram << "\n\n";
-        //    
-		//}
+        
+        if (myDriverRevG.getStatus() == true)
+        {
+            ROS_WARN("stim300 internal error ")
+        }
 
+         if (myDriverRevG.getChecksumStatus() == false)
+        {
+            ROS_WARN("stim300 CRC error ")
+        }
 
+        if (differenceInDataGram != 16)
+        {
+			std::cout << "Current Datagram counter diff : " << differenceInDataGram << "\n\n";
+            
+		}
+
+      
         stim300msg.orientation_covariance[0] = -1;
         stim300msg.angular_velocity_covariance[0] = -1;
         stim300msg.linear_acceleration_covariance[0] = -1;
@@ -275,6 +290,7 @@ int main(int argc , char **argv)
         stim300msg.orientation.x = 0;
         stim300msg.orientation.y = 0;
         stim300msg.orientation.z = 0;
+
 
         ROS_INFO("Publishing sensor data from IMU");
 
@@ -305,7 +321,6 @@ int main(int argc , char **argv)
         //std::cout<<"Datagram counter diff: "<< myDriverRevG.getDatagramCounterDiff()<<"\n";
         //std::cout<<"Gyro: " <<myDriverRevG.getGyroData()[0] <<"\n";
         diff = myDriverRevG.getDatagramCounterDiff();
-
 
 
         if (diff != 16)

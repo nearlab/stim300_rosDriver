@@ -106,11 +106,13 @@ generate_messages(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES STIM300RosDriver
    CATKIN_DEPENDS roscpp rospy message_runtime std_msgs sensor_msgs
-   DEPENDS eigen #system_lib 
+   DEPENDS eigen system_lib 
 )
 
 ###########
@@ -139,6 +141,9 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 file(GLOB SOURCES "src/*.cpp" "src/*/*.cpp")
 add_executable(stim300 ${SOURCES})
+
+
+target_link_libraries(stim300 ${catkin_LIBRARIES})
 
 
 ## Rename C++ executable without prefix
