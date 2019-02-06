@@ -109,7 +109,7 @@ catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES STIM300RosDriver
    CATKIN_DEPENDS roscpp rospy message_runtime std_msgs sensor_msgs
-   DEPENDS system_lib eigen
+   DEPENDS eigen #system_lib 
 )
 
 ###########
@@ -137,7 +137,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 file(GLOB SOURCES "src/*.cpp" "src/*/*.cpp")
- add_executable(${PROJECT_NAME}_node $(SOURCES))
+add_executable(stim300 ${SOURCES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
