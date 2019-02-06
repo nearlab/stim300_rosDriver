@@ -9,6 +9,16 @@
 #include <Stim300RevG.hpp>
 
 
+// For ROS to work properly 
+
+#include "sensor_msgs/Imu.h"
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
+//////////////
+
+
+
 using namespace std;
 
 /**
@@ -177,11 +187,12 @@ void signal_terminator (int sig, void *values)
 	
 }
 
-int main(int argc, char** argv)
+
+int main(int argc , char **argv)
 {
-    imu_stim300::Stim300RevD myDriverRevD;
-    imu_stim300::Stim300RevB myDriverRevB;
+   
 	imu_stim300::Stim300RevG myDriverRevG;
+
     handling_t pfunc;
 	
     if (argc<2)
@@ -195,79 +206,6 @@ int main(int argc, char** argv)
 
     /* Catching system signals */
     signal_catcher (SIGHUP,SIGINT,SIGTERM, SIGSEGV, pfunc, &myDriverRevG);
-
-//     ******************************************
-    // This is "123456789" in ASCII
-//     unsigned char const  data[] = { 0x97, 0x00, 0x01, 0x37, 0x00, 0x01, 0xc7, 0xff, 0xfe, 0x74,
-//      0x00, 0x00, 0x06, 0x32, 0x00, 0x11, 0xad, 0x07, 0xf4, 0x45, 0x00, 0xff, 0xec, 0xbc, 0x00, 0x37, 0x93, 0x40, 0x06, 0x2a, 0x00,
-//      0x20, 0x4f, 0x20, 0x69, 0x20, 0x55, 0x00, 0xd9, 0x03, 0xf8};
-//     std::size_t const    data_len = sizeof( data ) / sizeof( data[0] );
-
-
-//     for (int i=0; i<(int)sizeof(data);i++)
-//     {
-// 	printf("%X \n", data[i]);
-//     }
-//     std::cout<<"Size of data: "<< sizeof(data)<<"\n";
-//     std::cout<<"Size of data: "<< sizeof(data)/sizeof(data[0])<<"\n";
-
-//     // The expected CRC for the given data
-//     boost::uint32_t const  expected = 0x21c1e045;
-
-//     // Simulate CRC-CCITT
-//     boost::crc_basic<32>  crc_32(0x04C11DB7, 0xFFFFFFFF, 0x00, false, false);
-//     crc_32.process_bytes(data, data_len);
-//     printf("Checksum: %X \n", crc_32.checksum());
-//     printf("Expected: %X \n", expected);
-//
-//     // Simulate CRC-CCITT
-//     crc_32 =  boost::crc_basic<32> (0x04C11DB7, 0xFFFFFFFF, 0x00, true, false);
-//     crc_32.reset();
-//     crc_32.process_bytes(data, data_len);
-//     printf("Checksum: %X \n", crc_32.checksum());
-//     printf("Expected: %X \n", expected);
-//
-//     // Simulate CRC-CCITT
-//     crc_32 = boost::crc_basic<32> (0x04C11DB7, 0xFFFFFFFF, 0x00, false, true);
-//     crc_32.reset();
-//     crc_32.process_bytes(data, data_len);
-//     printf("Checksum: %X \n", crc_32.checksum());
-//     printf("Expected: %X \n", expected);
-//
-//
-//
-//
-//     // Simulate CRC-CCITT
-//     crc_32 = boost::crc_basic<32> (0x04C11DB7, 0xFFFFFFFF, 0x00, true, true);
-//     crc_32.reset();
-//     crc_32.process_bytes(data, data_len);
-//     printf("Checksum: %X \n", crc_32.checksum());
-//     printf("Expected: %X \n", expected);
-//
-//     std::cout << "All tests passed." << std::endl;
-//
-//      // This is "123456789" in ASCII
-//     unsigned char const  data2[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
-//      0x38, 0x39 };
-//     std::size_t const    data2_len = sizeof( data2 ) / sizeof( data2[0] );
-//
-//     // The expected CRC for the given data
-//     boost::uint16_t const  expected2 = 0x29B1;
-//
-//     // Simulate CRC-CCITT
-//     boost::crc_basic<16>  crc_ccitt1( 0x1021, 0xFFFF, 0, false, false );
-//     crc_ccitt1.process_bytes( data2, data2_len );
-//      printf("Checksum: %X \n", crc_ccitt1.checksum());
-//     assert( crc_ccitt1.checksum() == expected2 );
-//
-//     // Repeat with the optimal version (assuming a 16-bit type exists)
-//     boost::crc_optimal<16, 0x1021, 0xFFFF, 0, false, false>  crc_ccitt2;
-//     crc_ccitt2 = std::for_each( data2, data2 + data2_len, crc_ccitt2 );
-//     assert( crc_ccitt2() == expected2 );
-//
-//
-//     std::cout << "All tests passed." << std::endl;
-//     return 0;
 
 
     myDriverRevG.welcome();
@@ -284,24 +222,92 @@ int main(int argc, char** argv)
 	return 1;
     }
     usleep(98000);
-    //myDriverRevG.printInfo();
 
-    int i = 1;
-    int diff = 0;
-    while (i < 100)
+
+    // ROS PART ---------------------------------------------
+
+      // Initlize node
+
+
+    ros::init(argc, argv,  "stim300");
+
+    ros::NodeHandle node;
+
+    ros::Publisher imuSensorPublisher = node.advertise<sensor_msgs::Imu>("sensors/imus/STIM300", 1000);
+
+    ros::Rate loop_rate(125);
+
+    //int i{0};
+
+    //nt differenceInDataGram{0};
+    int countMessages{0};
+
+    while(ros::ok()){
+        
+        
+        sensor_msgs::Imu stim300msg;
+
+        myDriverRevG.processPacket();
+
+        //differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
+
+        //if (differenceInDataGram != 16)
+        //{
+		//	std::cout << "Current Datagram counter diff : " << differenceInDataGram << "\n\n";
+        //    
+		//}
+
+
+        stim300msg.orientation_covariance[0] = -1;
+        stim300msg.angular_velocity_covariance[0] = -1;
+        stim300msg.linear_acceleration_covariance[0] = -1;
+
+        // Place sensor data from IMU to message
+
+        stim300msg.linear_acceleration.x = myDriverRevG.getAccData()[0];
+        stim300msg.linear_acceleration.y = myDriverRevG.getAccData()[1];
+        stim300msg.linear_acceleration.z = myDriverRevG.getAccData()[2];
+
+        stim300msg.angular_velocity.x = myDriverRevG.getGyroData()[0];
+        stim300msg.angular_velocity.y = myDriverRevG.getGyroData()[1];
+        stim300msg.angular_velocity.z = myDriverRevG.getGyroData()[2];
+
+        stim300msg.orientation.x = 0;
+        stim300msg.orientation.y = 0;
+        stim300msg.orientation.z = 0;
+
+        ROS_INFO("Publishing sensor data from IMU");
+
+        imuSensorPublisher.publish(stim300msg);
+
+        ros::spinOnce();
+
+        loop_rate.sleep();
+
+        ++countMessages;
+
+    }
+
+/*
+    while (i < 1000)
     {
         i++;
+
+        
         //usleep(9800);
 
 
         myDriverRevG.processPacket();
-        //myDriverRevG.printInfo();
 
 
+        myDriverRevG.printInfo();
 
         //std::cout<<"Datagram counter diff: "<< myDriverRevG.getDatagramCounterDiff()<<"\n";
         //std::cout<<"Gyro: " <<myDriverRevG.getGyroData()[0] <<"\n";
         diff = myDriverRevG.getDatagramCounterDiff();
+
+
+
         if (diff != 16)
         {
 			std::cout << "Current Datagram counter diff : " << diff << "\n\n";
@@ -338,7 +344,8 @@ int main(int argc, char** argv)
 //	std::cout<<"I: "<<i<<"\n";
 //	i++;
 	
-//    }
+//    } 
+*/
 
     myDriverRevG.close();
 	
