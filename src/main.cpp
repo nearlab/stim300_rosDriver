@@ -256,14 +256,14 @@ int main(int argc , char **argv)
         differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
 
         
-        if (myDriverRevG.getStatus() == true)
+        if (myDriverRevG.getStatus() == false)
         {
-            ROS_WARN("stim300 internal error ")
+            ROS_WARN("stim300 internal error ");
         }
 
          if (myDriverRevG.getChecksumStatus() == false)
         {
-            ROS_WARN("stim300 CRC error ")
+            ROS_WARN("stim300 CRC error ");
         }
 
         if (differenceInDataGram != 16)
@@ -292,7 +292,7 @@ int main(int argc , char **argv)
         stim300msg.orientation.z = 0;
 
 
-        ROS_INFO("Publishing sensor data from IMU");
+        //ROS_INFO("Publishing sensor data from IMU");
 
         imuSensorPublisher.publish(stim300msg);
 
