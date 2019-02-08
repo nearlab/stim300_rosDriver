@@ -252,7 +252,7 @@ int main(int argc , char **argv)
         sensor_msgs::Imu stim300msg;
 
         myDriverRevG.processPacket();
-
+        stim300msg.header.stamp = ros::Time::now();
         differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
 
         
