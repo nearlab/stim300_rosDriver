@@ -139,9 +139,15 @@ int Stim300RevG::processPacket()
         /** Verify the Checksum **/
         this->inertial_values.checksum = verifyChecksum(this->expectedCRC, this->calculatedCRC);
 
-        //if ((this->currentP->acc_status + this->currentP->gyros_status + this->currentP->incl_status) == 0)
-        //{
+        if ((this->currentP->acc_status + this->currentP->gyros_status + this->currentP->incl_status) == 0)
+        {
             this->internal_error = false;
+        }
+        else
+        {
+            this->internal_error = true;
+        }
+        
 
             /** If everything is alright convert the values **/
             if (prev_counter == std::numeric_limits<uint8_t >::quiet_NaN())

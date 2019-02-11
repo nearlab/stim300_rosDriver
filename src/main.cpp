@@ -234,7 +234,7 @@ int main(int argc , char **argv)
     ros::NodeHandle node;
 
 
-    ros::Publisher imuSensorPublisher = node.advertise<sensor_msgs::Imu>("sensors/imus/STIM300", 1000);
+    ros::Publisher imuSensorPublisher = node.advertise<sensor_msgs::Imu>("imu/data_raw", 1000);
 
     ros::Rate loop_rate(125);
 
@@ -243,9 +243,7 @@ int main(int argc , char **argv)
     int differenceInDataGram{0};
     int countMessages{0};
 
-
-
-
+    ROS_INFO("Publishing sensor data from IMU");
     while(ros::ok()){
         
         
@@ -253,6 +251,7 @@ int main(int argc , char **argv)
 
         myDriverRevG.processPacket();
         stim300msg.header.stamp = ros::Time::now();
+        stim300msg.header.frame_id = "imu_frame";
         differenceInDataGram = myDriverRevG.getDatagramCounterDiff();
 
         
@@ -292,7 +291,7 @@ int main(int argc , char **argv)
         stim300msg.orientation.z = 0;
 
 
-        //ROS_INFO("Publishing sensor data from IMU");
+
 
         imuSensorPublisher.publish(stim300msg);
 
